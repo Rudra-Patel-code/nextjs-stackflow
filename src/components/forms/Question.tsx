@@ -45,7 +45,7 @@ const Question = ({ mongoUserId, questionDetails, type }: Props) => {
       parsedQuestionDetails = JSON.parse(questionDetails);
       groupedTags = parsedQuestionDetails.tags.map((tag: any) => tag.name);
     } catch (error) {
-      console.error("Error parsing JSON:", error);
+      console.error("parsing JSON ERROR:", error);
     }
   } else {
     parsedQuestionDetails = {};
