@@ -8,6 +8,7 @@ import { User } from "@/database/user.model";
 import { ITag, Tag } from "@/database/tag.model";
 import { FilterQuery } from "mongoose";
 import { Question } from "@/database/question.model";
+import Interaction from "@/database/interaction.model";
 
 export const getTopInteractedTags = async (
   params: GetTopInteractedTagsParams
@@ -21,13 +22,31 @@ export const getTopInteractedTags = async (
 
     if (!user) throw new Error("user not found");
 
-    // TODO: find interaction fro the user
+    // TODO: find interactions of the user and group by tags to return array of tags
+    const topInteractedTags = await Interaction.aggregate([
+      { $match: { user: userId } }, // Filter interactions by user ID
+      { $unwind: "$tags" }, // Unwind the tags array
+      { $group: { _id: "$tags", count: { $sum: 1 } } }, // Group by tags and count occurrences
+      {
+        $lookup: {
+          from: "tags",
+          localField: "_id",
+          foreignField: "_id",
+          as: "tagDetails",
+        },
+      }, // Lookup tag details
+      { $unwind: "$tagDetails" }, // Unwind the tag details array
+      {
+        $project: {
+          name: "$tagDetails.name",
+          description: "$tagDetails.description",
+          count: 1,
+        },
+      }, // Project fields
+      { $sort: { count: -1 } }, // Sort by count in descending order
+    ]);
 
-    return [
-      { _id: "1", name: "tag1" },
-      { _id: "2", name: "tag2" },
-      { _id: "3", name: "tag3" },
-    ];
+    return topInteractedTags;
   } catch (error) {
     console.log(error);
     throw error;

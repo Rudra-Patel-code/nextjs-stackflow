@@ -16,7 +16,10 @@ interface Props {
 }
 
 const UserCard = async ({ user }: Props) => {
+  // let interactedTags: { _id: string; name: string }[] = [];
   const interactedTags = await getTopInteractedTags({ userId: user._id });
+
+  // console.log(_interactedTags);
 
   return (
     <Link
